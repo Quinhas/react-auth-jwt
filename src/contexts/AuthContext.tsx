@@ -25,8 +25,10 @@ interface UserProps {
 interface AuthContextProps {
   handleLogin: (props: LoginProps) => Promise<void>;
   handleRegister: (props: RegisterProps) => Promise<void>;
+  handleLogout: () => Promise<void>;
   isLoading: boolean;
   isLogged: boolean;
+  user?: UserProps;
 }
 
 export const AuthContext = createContext({} as AuthContextProps);
@@ -62,6 +64,14 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     await axios.post('http://localhost:3333/user/signup', { username, password });
   }
 
+  async function handleLogout() {
+    setUser(undefined);
+    setIsLoading(false);
+    setIsLogged(false);
+    localStorage.removeItem('token');
+    navigate('/entrar');
+  }
+
   useEffect(() => {
     try {
       const localToken = localStorage.getItem('token');
@@ -87,5 +97,5 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     }
   }, [isLoading, isLogged]);
 
-  return <AuthContext.Provider value={{ handleLogin, handleRegister, isLoading, isLogged }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ handleLogin, handleRegister, handleLogout, isLoading, isLogged, user }}>{children}</AuthContext.Provider>;
 }
