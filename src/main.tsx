@@ -1,6 +1,7 @@
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
+import { AuthContextProvider } from './contexts/AuthContext';
 import { CustomRoutes } from './routes';
 
 const theme = extendTheme({
@@ -17,7 +18,9 @@ const theme = extendTheme({
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <BrowserRouter>
     <ChakraProvider theme={theme}>
-      <CustomRoutes />
+      <AuthContextProvider>
+        <CustomRoutes />
+      </AuthContextProvider>
     </ChakraProvider>
   </BrowserRouter>
 )
