@@ -1,3 +1,4 @@
+import { useToast } from "@chakra-ui/react";
 import axios from "axios";
 import jwtDecode, { JwtPayload } from "jwt-decode";
 import { createContext, useEffect, useState } from "react";
@@ -39,6 +40,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
   const [user, setUser] = useState<UserProps>();
   const navigate = useNavigate();
   const location = useLocation();
+  const toast = useToast();
 
   function validateToken(token: string): UserProps {
     const decodedToken = jwtDecode<JwtPayload & UserProps>(token);
@@ -94,6 +96,29 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
       if (['/entrar', '/cadastrar'].includes(location.pathname)) {
         navigate('/');
       }
+
+      const interceptor = axios.interceptors.response.use(
+        (res) => res,
+        (err) => {
+          if (err.response?.status === 401) {
+            toast({
+              title: "Opa!",
+              status: "warning",
+              description: "Sessão expirada. Faça login novamente.",
+              isClosable: true,
+              duration: 3000
+            });
+            handleLogout();
+            return {};
+          }
+
+          return err;
+        }
+      )
+
+      return () => {
+        axios.interceptors.response.eject(interceptor);
+      };
     }
   }, [isLoading, isLogged]);
 
