@@ -25,12 +25,15 @@ interface UserProps {
 interface AuthContextProps {
   handleLogin: (props: LoginProps) => Promise<void>;
   handleRegister: (props: RegisterProps) => Promise<void>;
+  isLoading: boolean;
+  isLogged: boolean;
 }
 
 export const AuthContext = createContext({} as AuthContextProps);
 
 export function AuthContextProvider({ children }: AuthContextProviderProps) {
   const [isLogged, setIsLogged] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<UserProps>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -71,16 +74,18 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     } catch (error) {
       setIsLogged(false);
       localStorage.removeItem('token');
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (isLogged) {
+    if (!isLoading && isLogged) {
       if (['/entrar', '/cadastrar'].includes(location.pathname)) {
         navigate('/');
       }
     }
-  }, [isLogged]);
+  }, [isLoading, isLogged]);
 
-  return <AuthContext.Provider value={{ handleLogin, handleRegister }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ handleLogin, handleRegister, isLoading, isLogged }}>{children}</AuthContext.Provider>;
 }
